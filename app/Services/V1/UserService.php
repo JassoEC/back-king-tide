@@ -6,10 +6,13 @@ use App\Http\Requests\V1\UserRequest;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UserService
 {
     protected $userRepository;
+    protected $profileImagesPath;
 
     /**
      * Creates the instance of service
@@ -18,7 +21,8 @@ class UserService
      */
     public function __construct(UserRepository $userRepository)
     {
-        $this->userRepository = $userRepository;
+        $this->userRepository       = $userRepository;
+        $this->updateProfilePicture = 'users/profile_picture';
     }
 
     /**
@@ -38,8 +42,8 @@ class UserService
 
             $user->fill([
                 'name'            => $request->name,
-                'last_name'       => $request->last_name,
-                'sur_name'        => $request->sur_name,
+                'last_name'       => $request->lastName,
+                'sur_name'        => $request->surName,
                 'birthday'        => $request->birthday,
                 'rfc'             => $request->rfc,
                 'profile_picture' => $picture,
@@ -77,8 +81,8 @@ class UserService
 
             $user->fill([
                 'name'      => $request->name,
-                'last_name' => $request->last_name,
-                'sur_name'  => $request->sur_name,
+                'last_name' => $request->lastName,
+                'sur_name'  => $request->surName,
                 'birthday'  => $request->birthday,
                 'rfc'       => $request->rfc,
             ]);
@@ -104,19 +108,40 @@ class UserService
     }
 
     /**
-     * store profile picture with file given
+     * store profile picture with a file given
      *
      * @param UserRequest $request
      * @return string|null
      */
     public function updateProfilePicture(UserRequest $request): ?string
     {
-        return '';
+        if (!$request->hasFile('image')) {
+            return null;
+        }
+
+        $imageName = Str::random(25) . '.jpg';
+
+        $path = "{$this->profileImagePicture}/{$imageName}";
+
+        Storage::disk('public')->put($path, $request->file('image'));
+
+        return $imageName;
+
     }
 
-    public function deleteOldProfilePicture(string $path): void
+    /**
+     * Delete image file with path given
+     *
+     * @param string $imagePath
+     * @return void
+     */
+    public function deleteOldProfilePicture(string $imagePath): void
     {
-        # code...
+        $path = "{$this->updateProfilePicture}/{$imagePath}";
+
+        if (Storage::disk('public')->exists($path)) {
+            Storage::delete($path);
+        }
     }
 
 }
