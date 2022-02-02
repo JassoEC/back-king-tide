@@ -4,7 +4,7 @@ namespace App\Services\V1;
 
 use App\Http\Requests\V1\FileRequest;
 use App\Http\Requests\V1\ImageRequest;
-use App\Models\File;
+use App\Models\File as FileModel;
 use App\Models\User;
 use App\Repositories\FileRepository;
 use App\Repositories\UserRepository;
@@ -26,15 +26,23 @@ class FileService
         $this->userRepository = $userRepository;
         $this->fileRepository = $fileRepository;
 
-        $this->profileImagesPath = 'users/profile_picture';
-        $this->filesPath         = 'users/files';
+        $this->profileImagesPath = app('profileImagesPath');
+        $this->filesPath         = app('filesPath');
     }
 
-    public function storeProfileImage(ImageRequest $request, User $user): ?User
+    /**
+     * Update user's profile picture and images files
+     *
+     * @param \App\Http\Requests\V1\ImageRequest $request
+     * @return User|null
+     */
+    public function storeProfileImage(ImageRequest $request): ?User
     {
         $oldImage  = null;
         $oldPath   = null;
         $imageName = null;
+        $image     = null;
+        $user      = null;
 
         if (!$request->hasFile('image')) {
             return null;
@@ -44,23 +52,27 @@ class FileService
 
             DB::beginTransaction();
 
+            $user = $this->userRepository->find($request->userId);
+
             $oldImage = $user->profile_picture;
 
-            $imageName = Str::random(25) . '.jpg';
-            $path      = "{$this->profileImagesPath}/{$imageName}";
+            $image = $request->file('image');
 
-            Storage::disk('public')->put($path, $request->file('image'));
+            $imageName = Str::random(25) . '.jpg';
+
+            $image->storeAs($this->profileImagesPath, $imageName, 'public');
 
             if ($oldImage) {
                 $oldPath = "{$this->profileImagesPath}/{$oldImage}";
-                Storage::delete($oldPath);
+                Storage::disk('public')->delete($oldPath);
             }
 
             $user->profile_picture = $imageName;
+            $this->userRepository->save($user);
 
             DB::commit();
 
-            return $this->userRepository->save($user);
+            return $user->refresh();
 
         } catch (\Throwable $th) {
 
@@ -70,7 +82,13 @@ class FileService
         }
     }
 
-    public function storeResumeFile(FileRequest $request): ?File
+    /**
+     * upates files of user's resumes
+     *
+     * @param FileRequest $request
+     * @return FileModel|null
+     */
+    public function storeResumeFile(FileRequest $request): ?FileModel
     {
         $fileName  = null;
         $oldResume = null;
@@ -88,15 +106,15 @@ class FileService
 
             DB::beginTransaction();
 
-            $now = Carbon::now()->format('dmY');
+            $now = Carbon::now()->format('dmYhm');
 
             $resume = $request->file('resume');
 
             $fileName = Str::random(5) . "_{$now}.{$resume->getClientOriginalExtension()}";
 
-            $resume->storeAs($this->filesPath, $fileName, 'local');
+            $resume->storeAs($this->filesPath, $fileName, 'public');
 
-            $newResume = new File();
+            $newResume = new FileModel();
 
             $newResume->fill([
                 'file'    => $fileName,
@@ -106,8 +124,8 @@ class FileService
             $newResume = $this->fileRepository->save($newResume);
 
             if ($oldResume) {
-                $oldPath = "{$this->profileImagesPath}/{$oldResume->path}";
-                Storage::delete($oldPath);
+                $oldPath = "{$this->filesPath}/{$oldResume->file}";
+                Storage::disk('public')->delete($oldPath);
                 $this->fileRepository->delete($oldResume);
             }
 

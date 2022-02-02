@@ -22,7 +22,7 @@ class UserService
     public function __construct(UserRepository $userRepository)
     {
         $this->userRepository    = $userRepository;
-        $this->profileImagesPath = 'users/profile_picture';
+        $this->profileImagesPath = app('profileImagesPath');
     }
 
     /**
