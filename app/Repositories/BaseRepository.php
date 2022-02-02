@@ -33,4 +33,10 @@ class BaseRepository
             ->model
             ->paginate($perPage);
     }
+
+    public function delete(Model $model)
+    {
+        $model->delete();
+        return $model;
+    }
 }
