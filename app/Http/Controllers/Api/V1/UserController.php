@@ -17,9 +17,9 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(UserRepository $repository)
+    public function index(Request $request, UserRepository $repository)
     {
-        $data = $repository->getPaginatedData();
+        $data = $repository->getPaginatedData([], $request->query('perPage'));
         return UserResource::collection($data);
     }
 
