@@ -50,11 +50,38 @@ class User extends Authenticatable
     ];
 
     /**
+     * Custom attributes that should be append.
+     *
+     * @var array<string, string>
+     */
+
+    protected $appends = ['profile_picture_path'];
+
+    /**
+     * Relationships
+     */
+
+    public function files()
+    {
+        return $this->hasMany(File::class);
+    }
+
+    /**
      * Mutators
      */
 
     public function setBirthdayAttribute($value)
     {
         return $this->attributes['birthday'] = Carbon::parse($value)->format('Y-m-d h:m:s');
+    }
+
+    /**
+     * Getters
+     *
+     */
+
+    public function getProfilePicturePathAttribute()
+    {
+        return $this->profile_picture ? "storage/" . app('profileImagesPath') . "/" . $this->profile_picture : null;
     }
 }
