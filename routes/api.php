@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\FileController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,3 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::apiResource('user', UserController::class);
+
+Route::post('/file', [FileController::class, 'storeResume']);
+
+Route::post('/photo', [FileController::class, 'storeProfileImage']);
