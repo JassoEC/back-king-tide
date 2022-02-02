@@ -14,11 +14,12 @@ class BaseRepository
         $this->model = $model;
     }
 
-    public function find($id)
+    public function find($id, $with = [])
     {
         return $this
             ->model
-            ->find($id);
+            ->with($with)
+            ->findOrFail($id);
     }
 
     public function save(Model $model)
@@ -27,10 +28,11 @@ class BaseRepository
         return $model;
     }
 
-    public function getPaginatedData($perPage = 10)
+    public function getPaginatedData($with = [], $perPage = 10)
     {
         return $this
             ->model
+            ->with($with)
             ->paginate($perPage);
     }
 
