@@ -92,8 +92,10 @@ class UserService
                 $user->profile_picture = $picture;
             }
 
-            $this->deleteOldProfilePicture($oldPicture);
-
+            if($oldPicture) {
+                $this->deleteOldProfilePicture($oldPicture);
+            }
+            
             $this->userRepository->save($user);
 
             DB::commit();
