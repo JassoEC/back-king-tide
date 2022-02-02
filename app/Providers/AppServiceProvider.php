@@ -23,6 +23,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $this->app->singleton('profileImagesPath', function () {
+            return 'users/profile_picture';
+        });
+
+        $this->app->singleton('filesPath', function () {
+            return 'users/files';
+        });
     }
 }
