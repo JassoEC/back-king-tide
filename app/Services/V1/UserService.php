@@ -21,8 +21,8 @@ class UserService
      */
     public function __construct(UserRepository $userRepository)
     {
-        $this->userRepository       = $userRepository;
-        $this->updateProfilePicture = 'users/profile_picture';
+        $this->userRepository    = $userRepository;
+        $this->profileImagesPath = 'users/profile_picture';
     }
 
     /**
@@ -121,7 +121,7 @@ class UserService
 
         $imageName = Str::random(25) . '.jpg';
 
-        $path = "{$this->profileImagePicture}/{$imageName}";
+        $path = "{$this->profileImagesPath}/{$imageName}";
 
         Storage::disk('public')->put($path, $request->file('image'));
 
@@ -137,7 +137,7 @@ class UserService
      */
     public function deleteOldProfilePicture(string $imagePath): void
     {
-        $path = "{$this->updateProfilePicture}/{$imagePath}";
+        $path = "{$this->profileImagesPath}/{$imagePath}";
 
         if (Storage::disk('public')->exists($path)) {
             Storage::delete($path);
