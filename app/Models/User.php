@@ -84,4 +84,8 @@ class User extends Authenticatable
     {
         return $this->profile_picture ? "storage/" . app('profileImagesPath') . "/" . $this->profile_picture : null;
     }
+    public function getFullNameAttribute()
+    {
+        return "{$this->name} {$this->last_name} {$this->sur_name}";
+    }
 }

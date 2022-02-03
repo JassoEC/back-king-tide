@@ -22,6 +22,7 @@ class UserResource extends JsonResource
             'rfc'                => $this->rfc,
             'birthday'           => $this->birthday,
             'profilePicture'     => $this->profilePicture,
+            'fullName'           => $this->full_name,
             'profilePicturePath' => $this->profilePicturePath,
             'updatedAt'          => $this->updatedAt,
             'files'              => FileResource::collection($this->files),
