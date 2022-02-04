@@ -17,6 +17,15 @@ class File extends Model
     protected $fillable = ['file', 'user_id'];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'user_id' => 'int',
+    ];
+
+    /**
      * Custom attributes that should be append.
      *
      * @var array<string, string>
